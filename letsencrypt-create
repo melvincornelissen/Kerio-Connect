@@ -37,5 +37,5 @@ ln -s /etc/letsencrypt/live/mx.$1/privkey.pem /opt/kerio/mailserver/sslcert/$1.k
 #Start Kerio Connect
 service kerio-connect start
 
-echo " Het certificaat voor ${CERT_NAME} is gereed"
+echo "Het certificaat voor ${CERT_NAME} is gereed!"
 
