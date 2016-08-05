@@ -1,0 +1,41 @@
+#!/bin/bash
+
+SCRIPT_DESCRIPTION="Maak certificaten via Let's Encrypt en plaats deze op de juiste plaats in de Kerio Connect SSL store."
+SCRIPT_AUTHOR="Melvin Cornelissen"
+SCRIPT_VERSION="1.0"
+SCRIPT_DATE="08-08-2016"
+SCRIPT_NAME=$(basename "$0")
+
+DOMAIN_NAME="$1"
+CERT_NAME="mx.$1"
+
+
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+	echo ""
+	echo "${SCRIPT_DESCRIPTION}"
+	echo "Author: ${SCRIPT_AUTHOR}  Version: ${SCRIPT_VERSION}  Last modified: ${SCRIPT_DATE}"
+	echo ""
+	echo "Gebruik: ${SCRIPT_NAME} [domeinnaam.tld] [-h]"
+  #Als er geen parameters moet er een error worden weergegeven.
+  if [ $# -eq 0 ]; then
+	echo ""
+	echo "ERROR:   Er is geen domeinnaam gespecificeerd. Om een certificaat aan te vragen moet je een domeinnaam opgeven, gebruik hiervoor domain.tld."
+  fi
+  exit 1;
+fi;
+
+#Stop Kerio Connect
+service kerio-connect stop
+
+#Maak certificaten aan op basis van standalone webserver
+/opt/letsencrypt/letsencrypt-auto certonly --standalone --keep-until-expiring -d mx.$1 -d webmail.$1 -d mail.$1
+
+#Plaats aangemaakte certificaten op de juiste plaats in de Kerio SSL store
+ln -s /etc/letsencrypt/live/mx.$1/fullchain.pem /opt/kerio/mailserver/sslcert/$1.crt
+ln -s /etc/letsencrypt/live/mx.$1/privkey.pem /opt/kerio/mailserver/sslcert/$1.key
+
+#Start Kerio Connect
+service kerio-connect start
+
+echo " Het certificaat voor ${CERT_NAME} is gereed"
+
