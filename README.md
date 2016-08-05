@@ -1,1 +1,3 @@
 # Kerio-Connect
+
+Geen aanpassingen.
