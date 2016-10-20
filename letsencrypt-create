@@ -2,40 +2,60 @@
 
 SCRIPT_DESCRIPTION="Maak certificaten via Let's Encrypt en plaats deze op de juiste plaats in de Kerio Connect SSL store."
 SCRIPT_AUTHOR="Melvin Cornelissen"
-SCRIPT_VERSION="1.0"
-SCRIPT_DATE="08-08-2016"
+SCRIPT_VERSION="1.2"
+SCRIPT_DATE="11-08-2016"
 SCRIPT_NAME=$(basename "$0")
 
 DOMAIN_NAME="$1"
 CERT_NAME="mx.$1"
 
+FILE="/opt/kerio/mailserver/sslcert/$1.crt"
+LOG="/var/log/certbot-create.log"
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-	echo ""
-	echo "${SCRIPT_DESCRIPTION}"
-	echo "Author: ${SCRIPT_AUTHOR}  Version: ${SCRIPT_VERSION}  Last modified: ${SCRIPT_DATE}"
-	echo ""
-	echo "Gebruik: ${SCRIPT_NAME} [domeinnaam.tld] [-h]"
+        echo ""
+        echo "${SCRIPT_DESCRIPTION}"
+        echo "Author: ${SCRIPT_AUTHOR}  Version: ${SCRIPT_VERSION}  Last modified: ${SCRIPT_DATE}"
+        echo ""
+        echo "Gebruik: ${SCRIPT_NAME} [domeinnaam.tld] [-h]"
   #Als er geen parameters moet er een error worden weergegeven.
   if [ $# -eq 0 ]; then
-	echo ""
-	echo "ERROR:   Er is geen domeinnaam gespecificeerd. Om een certificaat aan te vragen moet je een domeinnaam opgeven, gebruik hiervoor domain.tld."
+    echo ""
+    echo "$(date) ERROR:   Er is geen domeinnaam gespecificeerd. Om een certificaat aan te vragen moet je een domeinnaam opgeven, gebruik hiervoor domain.tld." | tee -a "$LOG"
   fi
   exit 1;
 fi;
 
+#Start log
+echo "$(date) START:    Certificaat aanvraag gestart voor ${CERT_NAME}" | tee -a "$LOG"
+
 #Stop Kerio Connect
-service kerio-connect stop
+service kerio-connect stop > /dev/null
+echo "$(date) INFO:     Kerio Connect gestopt" | tee -a "$LOG"
 
 #Maak certificaten aan op basis van standalone webserver
-/opt/letsencrypt/certbot-auto certonly --standalone --keep-until-expiring -d mx.$1 -d webmail.$1 -d mail.$1
+/opt/letsencrypt/certbot-auto certonly --standalone --expand --keep-until-expiring -d mx.$1 -d webmail.$1 -d mail.$1 -d autodiscover.$1 > /dev/null
 
 #Plaats aangemaakte certificaten op de juiste plaats in de Kerio SSL store
-ln -s /etc/letsencrypt/live/mx.$1/fullchain.pem /opt/kerio/mailserver/sslcert/$1.crt
-ln -s /etc/letsencrypt/live/mx.$1/privkey.pem /opt/kerio/mailserver/sslcert/$1.key
+if [ ! -f $FILE ]
+        then
+                echo "$(date) INFO:     Certificaat voor $1 bestaat nog niet, links zullen worden aangemaakt." | tee -a "$LOG"
+                ln -s /etc/letsencrypt/live/mx.$1/fullchain.pem /opt/kerio/mailserver/sslcert/$1.crt
+                ln -s /etc/letsencrypt/live/mx.$1/privkey.pem /opt/kerio/mailserver/sslcert/$1.key
+        else
+                echo "$(date) INFO:     Certificaat voor $1 bestaat al, links worden verwijderd en opnieuw aangemaakt!" | tee -a "$LOG"
+                rm /opt/kerio/mailserver/sslcert/$1.*
+                echo "$(date) DELETE:     Bestaand certificaat verwijderd (Kerio)" | tee -a "$LOG"
+                rm -rf /etc/letsencrypt/live/*$1*
+                echo "$(date) DELETE:     Bestaand certificaat verwijderd (Letsencrypt)" | tee -a "$LOG"
+                ln -s /etc/letsencrypt/live/mx.$1/fullchain.pem /opt/kerio/mailserver/sslcert/$1.crt
+                ln -s /etc/letsencrypt/live/mx.$1/privkey.pem /opt/kerio/mailserver/sslcert/$1.key
+fi
 
 #Start Kerio Connect
-service kerio-connect start
+service kerio-connect start > /dev/null
+echo "$(date) INFO:     Kerio Connect gestart" | tee -a "$LOG"
+echo "$(date) INFO:     Het certificaat voor ${CERT_NAME} is gereed" | tee -a "$LOG"
 
-echo "Het certificaat voor ${CERT_NAME} is gereed!"
-
+#Einde log
+echo "$(date) STOP:     Certificaat aanvraag afgerond voor ${CERT_NAME}" | tee -a "$LOG"
