@@ -2,7 +2,7 @@
 
 SCRIPT_DESCRIPTION="Maak certificaten via Let's Encrypt en plaats deze op de juiste plaats in de Kerio Connect SSL store."
 SCRIPT_AUTHOR="Melvin Cornelissen"
-SCRIPT_VERSION="1.2"
+SCRIPT_VERSION="1.3"
 SCRIPT_DATE="11-08-2016"
 SCRIPT_NAME=$(basename "$0")
 
@@ -47,7 +47,11 @@ if [ ! -f $FILE ]
                 rm /opt/kerio/mailserver/sslcert/$1.*
                 echo "$(date) DELETE:     Bestaand certificaat verwijderd (Kerio)" | tee -a "$LOG"
                 rm -rf /etc/letsencrypt/live/*$1*
-                echo "$(date) DELETE:     Bestaand certificaat verwijderd (Letsencrypt)" | tee -a "$LOG"
+                echo "$(date) DELETE:     Bestaand certificaat verwijderd (Letsencrypt-live)" | tee -a "$LOG"
+                rm -rf /etc/letsencrypt/renewal/*$1*
+                echo "$(date) DELETE:     Bestaand certificaat verwijderd (Letsencrypt-renewal)" | tee -a "$LOG"
+                rm -rf /etc/letsencrypt/archive/*$1*
+                echo "$(date) DELETE:     Bestaand certificaat verwijderd (Letsencrypt-archive)" | tee -a "$LOG"
                 ln -s /etc/letsencrypt/live/mx.$1/fullchain.pem /opt/kerio/mailserver/sslcert/$1.crt
                 ln -s /etc/letsencrypt/live/mx.$1/privkey.pem /opt/kerio/mailserver/sslcert/$1.key
 fi
