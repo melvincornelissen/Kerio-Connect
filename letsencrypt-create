@@ -28,7 +28,7 @@ fi;
 service kerio-connect stop
 
 #Maak certificaten aan op basis van standalone webserver
-/opt/letsencrypt/letsencrypt-auto certonly --standalone --keep-until-expiring -d mx.$1 -d webmail.$1 -d mail.$1
+/opt/letsencrypt/certbot-auto certonly --standalone --keep-until-expiring -d mx.$1 -d webmail.$1 -d mail.$1
 
 #Plaats aangemaakte certificaten op de juiste plaats in de Kerio SSL store
 ln -s /etc/letsencrypt/live/mx.$1/fullchain.pem /opt/kerio/mailserver/sslcert/$1.crt
