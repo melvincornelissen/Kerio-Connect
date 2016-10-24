@@ -12,7 +12,7 @@ CERT_NAME="mx.$1"
 FILE="/opt/kerio/mailserver/sslcert/$1.crt"
 LOG="/var/log/certbot-create.log"
 
-if [ "$1" = "-d" ]; then 
+#if [ "$1" = "-d" ]; then 
 
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
