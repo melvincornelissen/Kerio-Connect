@@ -12,8 +12,8 @@ CERT_NAME="mx.$1"
 FILE="/opt/kerio/mailserver/sslcert/$1.crt"
 LOG="/var/log/certbot-create.log"
 
+#Controleren of een domein bij TransIP draait en zo ja, DNS records pushen.
 #if [ "$1" = "-d" ]; then 
-
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         echo ""
@@ -56,7 +56,9 @@ if [ ! -f $FILE ]
                 rm -rf /etc/letsencrypt/archive/*$1*
                 echo "$(date) DELETE:     Bestaand certificaat verwijderd (Letsencrypt-archive)" | tee -a "$LOG"
                 ln -s /etc/letsencrypt/live/mx.$1/fullchain.pem /opt/kerio/mailserver/sslcert/$1.crt
+                echo "$(date) INSERT:     Certificaat aangemaakt (Letsencrypt-crt)" | tee -a "$LOG"
                 ln -s /etc/letsencrypt/live/mx.$1/privkey.pem /opt/kerio/mailserver/sslcert/$1.key
+                echo "$(date) INSERT:     Key aangemaakt (Letsencrypt-key)" | tee -a "$LOG"
 fi
 
 #Start Kerio Connect
