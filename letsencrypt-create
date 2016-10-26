@@ -2,8 +2,8 @@
 
 SCRIPT_DESCRIPTION="Maak certificaten via Let's Encrypt en plaats deze op de juiste plaats in de Kerio Connect SSL store."
 SCRIPT_AUTHOR="Melvin Cornelissen"
-SCRIPT_VERSION="1.3"
-SCRIPT_DATE="20-10-2016"
+SCRIPT_VERSION="1.5"
+SCRIPT_DATE="26-10-2016"
 SCRIPT_NAME=$(basename "$0")
 
 DOMAIN_NAME="$1"
@@ -15,17 +15,19 @@ LOG="/var/log/certbot-create.log"
 #Controleren of een domein bij TransIP draait en zo ja, DNS records pushen.
 #if [ "$1" = "-d" ]; then 
 
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        echo ""
-        echo "${SCRIPT_DESCRIPTION}"
-        echo "Author: ${SCRIPT_AUTHOR}  Version: ${SCRIPT_VERSION}  Last modified: ${SCRIPT_DATE}"
-        echo ""
-        echo "Gebruik: ${SCRIPT_NAME} [domeinnaam.tld] [-h]"
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; 
+		then
+        		echo ""
+        		echo "${SCRIPT_DESCRIPTION}"
+        		echo "Author: ${SCRIPT_AUTHOR}  Version: ${SCRIPT_VERSION}  Last modified: ${SCRIPT_DATE}"
+        		echo ""
+        		echo "Gebruik: ${SCRIPT_NAME} [domeinnaam.tld] [-h]"
   #Als er geen parameters moet er een error worden weergegeven.
-  if [ $# -eq 0 ]; then
-    echo ""
-    echo "$(date) ERROR:   Er is geen domeinnaam gespecificeerd. Om een certificaat aan te vragen moet je een domeinnaam opgeven, gebruik hiervoor domain.tld." | tee -a "$LOG"
-  fi
+		if [ $# -eq 0 ]; 
+				then
+    					echo ""
+    					echo "$(date) ERROR:   Er is geen domeinnaam gespecificeerd. Om een certificaat aan te vragen moet je een domeinnaam opgeven, gebruik hiervoor domain.tld." | tee -a "$LOG"
+  		fi
   exit 1;
 fi;
 
