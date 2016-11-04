@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Stop Kerio Connect
+service kerio-connect stop
+
+#Renew Letsencrypt
+/usr/local/sbin/certbot-auto renew
+
+#Start Kerio Connect
+service kerio-connect start
