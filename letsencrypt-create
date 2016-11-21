@@ -13,9 +13,9 @@ FILE="/opt/kerio/mailserver/sslcert/$1.crt"
 LOG="/var/log/certbot-create.log"
 
 #Controleren of een domein bij TransIP draait en zo ja, DNS records pushen.
-#if [ "$1" = "-d" ]; then 
+#if [ "$#" = "-d" ]; then
 
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; 
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];
 		then
         		echo ""
         		echo "${SCRIPT_DESCRIPTION}"
@@ -23,7 +23,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];
         		echo ""
         		echo "Gebruik: ${SCRIPT_NAME} [domeinnaam.tld] [-h]"
   #Als er geen parameters moet er een error worden weergegeven.
-		if [ $# -eq 0 ]; 
+		if [ $# -eq 0 ];
 				then
     					echo ""
     					echo "$(date) ERROR:   Er is geen domeinnaam gespecificeerd. Om een certificaat aan te vragen moet je een domeinnaam opgeven, gebruik hiervoor domain.tld." | tee -a "$LOG"
@@ -49,7 +49,7 @@ if [ ! -f $FILE ]
                 ln -s /etc/letsencrypt/live/mx.$1/privkey.pem /opt/kerio/mailserver/sslcert/$1.key
         else
                 echo "$(date) INFO:     Certificaat voor $1 bestaat al, links worden verwijderd en opnieuw aangemaakt!" | tee -a "$LOG"
-                rm /opt/kerio/mailserver/sslcert/$1.*
+                rm /opt/kerio/mailserver/sslcert/$1*
                 echo "$(date) DELETE:     Bestaand certificaat verwijderd (Kerio)" | tee -a "$LOG"
                 rm -rf /etc/letsencrypt/live/*$1*
                 echo "$(date) DELETE:     Bestaand certificaat verwijderd (Letsencrypt-live)" | tee -a "$LOG"
